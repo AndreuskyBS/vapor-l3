@@ -1,0 +1,15 @@
+{
+  "name": "Vapor v3 Ultra Cloud",
+  "short_name": "Vapor v3",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#020205",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "https://flaticon.com",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
