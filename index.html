@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vapor v3 | Ultra Cloud</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #8b5cf6;
+            --pink: #d946ef;
+            --cyan: #06b6d4;
+            --bg-dark: #020205;
+            --menu-bg: rgba(8, 9, 14, 0.98);
+        }
+
+        /* --- OPTIMIZACIÓN DE RENDIMIENTO --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none !important; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            height: 100vh;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* --- CURSOR AVIÓN TECH FPS-SYNC --- */
+        #paper-plane-cursor {
+            position: fixed;
+            width: 26px;
+            height: 26px;
+            pointer-events: none;
+            z-index: 999999;
+            filter: drop-shadow(0 0 3px var(--accent)) drop-shadow(0 0 6px var(--pink));
+            will-change: transform, left, top;
+            transform: translate3d(0,0,0);
+        }
+
+        /* --- FONDO NEÓN DINÁMICO --- */
+        .space-bg {
+            position: absolute; width: 100%; height: 100%; z-index: -2;
+            background: var(--bg-dark); overflow: hidden;
+        }
+
+        .blob {
+            position: absolute; width: 85vw; height: 85vh; border-radius: 50%;
+            filter: blur(140px); opacity: 0.16;
+            will-change: transform;
+            pointer-events: none;
+        }
+        .blob-1 { background: var(--accent); top: -10%; left: -10%; }
+        .blob-2 { background: var(--pink); bottom: -10%; right: -10%; }
+
+        /* --- UI CENTRAL (CERO BUGS) --- */
+        .main-content { text-align: center; transition: 0.6s ease; isolation: isolate; }
+        .title-container { 
+            font-size: 6.5rem; font-weight: 800; letter-spacing: -3px; margin-bottom: 5px;
+            text-rendering: optimizeLegibility; transform: translateZ(0);
+        }
+        #typewriter { 
+            background: linear-gradient(135deg, #fff 50%, #a78bfa 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: inline-block; padding-right: 15px;
+        }
+        #random-phrase { 
+            color: rgba(255, 255, 255, 0.6); font-size: 1.1rem; font-weight: 500;
+            text-transform: lowercase; height: 1.6rem; margin-bottom: 35px;
+            transition: opacity 0.8s ease; text-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        .btn-get-started {
+            background: linear-gradient(45deg, #6d28d9, #d946ef);
+            padding: 12px 40px; border-radius: 40px; color: white; border: none; 
+            font-weight: 700; font-size: 0.9rem;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(139, 92, 246, 0.2); pointer-events: auto;
+        }
+        .btn-get-started:hover:not(.is-active) { transform: scale(1.06); box-shadow: 0 0 40px rgba(139, 92, 246, 0.5); }
+        .is-active { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+
+        /* --- INFO CARD SLICK --- */
+        #infoCard {
+            position: fixed; z-index: 5000; background: rgba(10, 12, 18, 0.98); 
+            backdrop-filter: blur(50px); padding: 45px; border-radius: 40px; 
+            border: 1px solid rgba(255, 255, 255, 0.1); text-align: center; width: 400px; 
+            display: none; flex-direction: column; gap: 25px; 
+            box-shadow: 0 50px 100px rgba(0,0,0,1);
+            animation: smoothPop 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes smoothPop { from { opacity: 0; transform: scale(0.9) translateY(60px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .btn-go { background: var(--accent); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 700; width: 100%; transition: 0.3s; }
+        .btn-go:hover { filter: brightness(1.2); }
+
+        /* --- MENÚ COMPACTO --- */
+        .nav-container { position: absolute; bottom: 25px; left: 25px; z-index: 1000; display: none; }
+        .nav-home { position: relative; padding-top: 50px; margin-top: -50px; }
+        .dropdown-menu {
+            position: absolute; bottom: 70px; left: 0; background: var(--menu-bg);
+            backdrop-filter: blur(40px); border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 22px; width: 240px; padding: 10px; display: flex;
+            flex-direction: column; gap: 4px; opacity: 0; transform: translateY(15px);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+        }
+        .nav-home:hover .dropdown-menu { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .menu-item { display: flex; align-items: center; padding: 12px 15px; border-radius: 14px; text-decoration: none; color: rgba(255, 255, 255, 0.45); font-size: 0.9rem; font-weight: 500; gap: 16px; transition: 0.2s; }
+        .menu-item:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+        .menu-item svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+        .tag { font-size: 0.55rem; padding: 3px 8px; border-radius: 6px; font-weight: 800; margin-left: auto; text-transform: uppercase; border: 1px solid currentColor; }
+        .btn-casa { width: 52px; height: 52px; background: #12141c; border-radius: 18px; display: flex; justify-content: center; align-items: center; border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
+
+        /* --- FOOTER CENTRADO --- */
+        .footer {
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 20px; color: rgba(255, 255, 255, 0.2); font-size: 0.95rem; z-index: 10;
+        }
+        .footer .divider { width: 1px; height: 16px; background: rgba(255, 255, 255, 0.1); }
+        .footer a { color: inherit; text-decoration: none; transition: 0.3s; display: flex; align-items: center; }
+        .footer a:hover { color: #fff; transform: scale(1.2); }
+    </style>
+</head>
+<body>
+
+    <!-- PAPER PLANE CURSOR -->
+    <svg id="paper-plane-cursor" viewBox="0 0 100 100">
+        <defs>
+            <linearGradient id="pGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#8b5cf6" />
+                <stop offset="100%" style="stop-color:#d946ef" />
+            </linearGradient>
+        </defs>
+        <path d="M2,2 L98,45 L42,58 L2,2" fill="url(#pGrad)" />
+        <path d="M42,58 L55,98 L98,45 L42,58" fill="rgba(0,0,0,0.3)" />
+        <path d="M2,2 L18,12 L12,18 L24,24 L18,30" stroke="#05050a" stroke-width="5" fill="none" />
+    </svg>
+
+    <div class="space-bg">
+        <div class="blob blob-1" id="blob1"></div>
+        <div class="blob blob-2" id="blob2"></div>
+    </div>
+
+    <!-- INFO CARD -->
+    <div id="infoCard">
+        <div style="text-align: center;">
+            <h3 style="font-size: 2rem; letter-spacing: -1.5px; margin-bottom: 15px;">Vapor v3</h3>
+            <p style="color: rgba(255,255,255,0.7); font-size: 1rem; line-height: 1.6;">
+                This is a beta system, any interactive button leads to a special link of each one, enjoy!
+            </p>
+        </div>
+        <button class="btn-go" onclick="finishSetup()">Get Access</button>
+    </div>
+
+    <div class="nav-container" id="navHome">
+        <div class="nav-home">
+            <div class="dropdown-menu">
+                <a href="https://arcadia-math.com" target="_blank" class="menu-item"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path></svg>Play <span class="tag" style="color:#4ade80">Updated</span></a>
+                <a href="https://cineby.sc" target="_blank" class="menu-item"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><path d="M10 8l4 2-4 2V8z"></path><line x1="12" y1="17" x2="12" y2="21"></line><line x1="8" y1="21" x2="16" y2="21"></line></svg>Watch</a>
+                <a href="https://chattide.ai" target="_blank" class="menu-item"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>AI <span class="tag" style="color:var(--cyan)">New!</span></a>
+                <a href="https://soundfly.es" target="_blank" class="menu-item"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>Listen <span class="tag" style="color:#4ade80">Updated</span></a>
+                <a href="#" class="menu-item" style="opacity: 0.2;"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>Tools</a>
+                <a href="https://bum.education" target="_blank" class="menu-item" style="background:rgba(139,92,246,0.1); color:var(--accent)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>Browse</a>
+            </div>
+            <button class="btn-casa"><svg viewBox="0 0 24 24" width="24" height="24" stroke="white" fill="none" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></button>
+        </div>
+    </div>
+
+    <div class="main-content" id="hero">
+        <div class="title-container"><span id="typewriter"></span></div>
+        <div id="random-phrase"></div>
+        <button class="btn-get-started" id="mainBtn" onclick="showInfo()">Get Started</button>
+    </div>
+
+    <!-- CENTERED FOOTER -->
+    <div class="footer">
+        <span>v3.5</span>
+        <div class="divider"></div>
+        <a href="https://discord.gg/MQe6GNg3" target="_blank" title="Join Discord">
+            <svg style="width:24px; height:24px; fill:currentColor;" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.666 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        </a>
+    </div>
+
+    <script>
+        // --- FPS SYNC ENGINE ---
+        const cursor = document.getElementById('paper-plane-cursor');
+        const b1 = document.getElementById('blob1');
+        const b2 = document.getElementById('blob2');
+        
+        let mX = 0, mY = 0, cX = 0, cY = 0, pX = 0, tick = 0;
+
+        document.addEventListener('mousemove', (e) => { mX = e.clientX; mY = e.clientY; });
+
+        function engine() {
+            tick += 0.01;
+            // Cursor Smoothing
+            cX += (mX - cX) * 0.25;
+            cY += (mY - cY) * 0.25;
+            let tilt = (mX - pX) * 2.8;
+            tilt = Math.max(Math.min(tilt, 45), -45);
+            
+            cursor.style.left = `${cX}px`;
+            cursor.style.top = `${cY}px`;
+            cursor.style.transform = `rotate(${tilt}deg)`;
+            
+            // Dynamic Background Movement
+            const shiftX = Math.sin(tick) * 50;
+            const shiftY = Math.cos(tick) * 30;
+            b1.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+            b2.style.transform = `translate(${-shiftX}px, ${-shiftY}px)`;
+
+            pX = mX;
+            requestAnimationFrame(engine);
+        }
+        engine();
+
+        // --- UI SYSTEM ---
+        function showInfo() {
+            const btn = document.getElementById('mainBtn');
+            btn.innerText = "incloud :D"; btn.classList.add('is-active');
+            document.getElementById('infoCard').style.display = 'flex';
+            document.getElementById('hero').style.filter = 'blur(20px)';
+        }
+        function finishSetup() {
+            document.getElementById('infoCard').style.display = 'none';
+            document.getElementById('navHome').style.display = 'block';
+            document.getElementById('hero').style.filter = 'blur(0)';
+            document.getElementById('hero').style.opacity = '1';
+        }
+
+        // --- PHRASES ENGINE ---
+        const phrases = ["explore the hidden world", "navigation without limits", "arcade experience reloaded", "stay vapor, stay hidden", "access granted to excellence"];
+        let deck = [];
+        function nextPhrase() {
+            const el = document.getElementById('random-phrase');
+            if (deck.length === 0) deck = [...phrases].sort(() => Math.random() - 0.5);
+            el.style.opacity = 0;
+            setTimeout(() => { el.innerText = deck.pop(); el.style.opacity = 1; }, 800);
+        }
+        nextPhrase(); setInterval(nextPhrase, 8000);
+
+        const textEl = document.getElementById('typewriter');
+        const title = "vapor v3"; let charIdx = 0;
+        function type() { if (charIdx <= title.length) { textEl.textContent = title.substring(0, charIdx++); setTimeout(type, 140); } }
+        type();
+    </script>
+</body>
+</html>
+
+
